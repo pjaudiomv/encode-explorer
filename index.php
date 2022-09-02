@@ -90,7 +90,7 @@ $_CONFIG['show_top'] = true;
 // The title for the page
 // Default: $_CONFIG['main_title'] = "Encode Explorer";
 //
-$_CONFIG['main_title'] = "Encode Explorer";
+$_CONFIG['main_title'] = "The Stuff";
 
 //
 // The secondary page titles, randomly selected and displayed under the main header.
@@ -137,7 +137,7 @@ $_CONFIG['hidden_dirs'] = array();
 // Filenames that will be hidden from the list.
 // Default: $_CONFIG['hidden_files'] = array(".ftpquota", "index.php", "index.php~", ".htaccess", ".htpasswd");
 //
-$_CONFIG['hidden_files'] = array(".ftpquota", "index.php", "index.php~", ".htaccess", ".htpasswd");
+$_CONFIG['hidden_files'] = array(".ftpquota", "index.php", "index.php~", "config.php", ".htaccess", ".htpasswd", "robots.txt", ".DS_Store");
 
 //
 // Whether authentication is required to see the contents of the page.
@@ -257,7 +257,7 @@ $_CONFIG['log_file'] = "";
 // For example: $_CONFIG['starting_dir'] = "./mysubdir/";
 // Default: $_CONFIG['starting_dir'] = ".";
 //
-$_CONFIG['starting_dir'] = ".";
+$_CONFIG['starting_dir'] = "./";
 
 //
 // Location in the server. Usually this does not have to be set manually.
@@ -1915,7 +1915,7 @@ class Logger
 		{
 			if(Location::isFileWritable(EncodeExplorer::getConfig('log_file')))
 			{
-				$message = "[" . date("Y-m-d h:i:s", mktime()) . "] ".$message." (".$_SERVER["HTTP_USER_AGENT"].")\n";
+				$message = "[" . date("Y-m-d h:i:s", time()) . "] ".$message." (".$_SERVER["HTTP_USER_AGENT"].")\n";
 				error_log($message, 3, EncodeExplorer::getConfig('log_file'));
 			}
 			else
@@ -1992,21 +1992,6 @@ class GateKeeper
 				$_SESSION['ee_user_name'] = isset($_POST['user_name'])?$_POST['user_name']:"";
 				$_SESSION['ee_user_pass'] = $_POST['user_pass'];
 
-				$addr  = $_SERVER['PHP_SELF'];
-				$param = '';
-
-				if(isset($_GET['m']))
-					$param .= (strlen($param) == 0 ? '?m' : '&m');
-
-				if(isset($_GET['s']))
-					$param .= (strlen($param) == 0 ? '?s' : '&s');
-
-				if(isset($_GET['dir']) && strlen($_GET['dir']) > 0)
-				{
-					$param .= (strlen($param) == 0 ? '?dir=' : '&dir=');
-					$param .= urlencode($_GET['dir']);
-				}
-				header( "Location: ".$addr.$param);
 			}
 			else
 				$encodeExplorer->setErrorString("wrong_pass");
@@ -2017,12 +2002,9 @@ class GateKeeper
 	{
 		foreach(EncodeExplorer::getConfig("users") as $user)
 		{
-			if($user[1] == $userPass)
+            if($userName == $user[0] && $user[1] == $userPass)
 			{
-				if(strlen($userName) == 0 || $userName == $user[0])
-				{
 					return true;
-				}
 			}
 		}
 		return false;
@@ -2163,8 +2145,7 @@ class FileManager
 	{
 		global $encodeExplorer;
 		$name = basename($userfile['name']);
-		if(get_magic_quotes_gpc())
-			$name = stripslashes($name);
+		$name = stripslashes($name);
 
 		$upload_dir = $location->getFullPath();
 		$upload_file = $upload_dir . $name;
@@ -2263,6 +2244,9 @@ class FileManager
 					FileManager::delete_dir($path);
 				else if(is_file($path))
 					FileManager::delete_file($path);
+
+                // Refresh so 'del' param is not in address anymore
+                EncodeExplorer::refresh();
 			}
 		}
 	}
@@ -2912,6 +2896,25 @@ class EncodeExplorer
 		$this->sort();
 		$this->outputHtml();
 	}
+
+    public static function refresh()
+    {
+        $addr  = $_SERVER['PHP_SELF'];
+        $param = '';
+
+        if(isset($_GET['m']))
+            $param .= (strlen($param) == 0 ? '?m' : '&m');
+
+        if(isset($_GET['s']))
+            $param .= (strlen($param) == 0 ? '?s' : '&s');
+
+        if(isset($_GET['dir']) && strlen($_GET['dir']) > 0)
+        {
+            $param .= (strlen($param) == 0 ? '?dir=' : '&dir=');
+            $param .= urlencode($_GET['dir']);
+        }
+        header( "Location: ".$addr.$param);
+    }
 
 	public function printLoginBox()
 	{
