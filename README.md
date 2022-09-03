@@ -50,3 +50,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[Sat Sep 03 15:15:17.438560 2022] [php:error] [pid 31075] [client 98.229.98.220:64206] 
+PHP Fatal error:  Uncaught ValueError: finfo_file(): 
+    Argument #1 ($finfo) cannot be empty in /home/narchive/public_html/index.php:2391
+    Stack trace:
+        #0 /home/narchive/public_html/index.php(2391): finfo_file()
+        #1 /home/narchive/public_html/index.php(2154): File::getFileMime()
+        #2 /home/narchive/public_html/index.php(2227): FileManager->uploadFile()
+        #3 /home/narchive/public_html/index.php(3312): FileManager->run()
+        #4 {main}
+    thrown in /home/narchive/public_html/index.php on line 2391
